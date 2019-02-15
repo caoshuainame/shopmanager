@@ -16,8 +16,8 @@
                 </el-col>
             </el-row>
       </el-header>
-      <!-- 侧边栏 -->
       <el-container>
+      <!-- 侧边栏 -->
         <el-aside class="aside" width="200px">
             <el-menu default-active="1" :router="true" :unique-opened="true">
                 <!-- 用户管理 -->
@@ -26,7 +26,7 @@
                     <i class="el-icon-location"></i>
                     <span>用户管理</span>
                   </template>
-                    <el-menu-item index="1-1">
+                    <el-menu-item index="users">
                         <i class="el-icon-menu"></i>
                         用户列表
                     </el-menu-item>
@@ -89,7 +89,9 @@
                 </el-submenu>
             </el-menu>
         </el-aside>
-        <el-main class="main">Main</el-main>
+        <el-main class="main">
+            <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
 
