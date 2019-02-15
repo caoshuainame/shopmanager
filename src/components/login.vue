@@ -24,23 +24,25 @@ export default {
     }
   },
   methods: {
-    handlelogin () {
-      this.$http
-        .post(`login`, this.formdata)
-        .then((res) => {
-          console.log(res)
-          const {
-              data: {
-            data,
-            meta: {msg, status}
-          }
-          } = res
-          if (status === 200) {
-            console.log('login---sucess----')
-          } else {
-            console.log('error----')
-          }
+    async handlelogin () {
+      const res = await this.$http.post(`login`, this.formdata)
+      console.log(res)
+      const {
+        data: {
+          data,
+          meta: {msg, status}
+        }
+      } = res
+
+      if (status === 200) {
+        localStorage.setItem('token', data.token)
+        // console.log('login---sucess----')
+        this.$router.push({
+          name: 'home'
         })
+      } else {
+        this.$message.error(msg)
+      }
     }
   }
 }
