@@ -10,10 +10,10 @@
         <!-- 搜索框 -->
         <el-row class="searchBox">
             <el-col>
-                <el-input class="searchInput" placeholder="请输入内容" v-model="query">
-                    <el-button slot="append" icon="el-icon-search"></el-button>
+                <el-input @clear="getAllUsers()" clearable class="searchInput" placeholder="请输入内容" v-model="query">
+                    <el-button @click ='searchUsers()' slot="append" icon="el-icon-search"></el-button>
                 </el-input>
-                <el-button type="primary">添加用户</el-button>
+                <el-button type="primary" @click="showDiaAddUser()">添加用户</el-button>
             </el-col>
         </el-row>
       <!-- 表格 -->
@@ -47,7 +47,7 @@
             <el-table-column prop label="操作" width="200">
                 <template slot-scope="scope">
                     <el-button type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
-                    <el-button type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
+                    <el-button @click="showMsgBox(scope.row)" type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
                     <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
                 </template>
             </el-table-column>
@@ -62,6 +62,27 @@
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
         </el-pagination>
+        <!-- 对话框-添加用户对话框 -->
+        <el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd">
+          <el-form label-position="lift" label-width="80px" :model="formdata">
+              <el-form-item label="用户名">
+                <el-input v-model="formdata.username"></el-input>
+              </el-form-item>
+              <el-form-item label="密码">
+                <el-input v-model="formdata.password"></el-input>
+              </el-form-item>
+              <el-form-item label="邮箱">
+                <el-input v-model="formdata.email"></el-input>
+              </el-form-item>
+              <el-form-item label="电话">
+                <el-input v-model="formdata.mobile"></el-input>
+              </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+            <el-button type="primary" @click="addUser()">确 定</el-button>
+          </div>
+        </el-dialog>
     </el-card>
 
 </template>
@@ -74,26 +95,82 @@ export default {
       pagenum: 1,
       pagesize: 3,
       total: -1,
-      list: []
+      list: [],
+      dialogFormVisibleAdd: false,
+      formdata: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      }
     }
   },
   created () {
-    this.getTabData()
+    this.getTableData()
   },
   methods: {
+    //   删除-弹出确认框
+    showMsgBox (user) {
+      this.$confirm('是否把我删除?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+        // 发送请求
+          const res = await this.$http.delete(`users/${user.id}`)
+          console.log(res)
+
+          const {meta: {msg, status}} = res.data
+          if (status === 200) {
+            // 提示成功
+            this.$message.success(msg)
+            this.pagenum = 1
+            this.getTableData()
+          }
+        })
+        .catch(() => {
+          this.$message.info('已取消删除')
+        })
+    },
+    //   添加用户-发送请求
+    async addUser () {
+      // 获取表单数据，发送内容
+      const res = await this.$http.post(`users`, this.formdata)
+      console.log(res)
+      // 关闭对话框
+      this.dialogFormVisibleAdd = false
+      // 更新表格
+      this.getTableData()
+    },
+    //   添加用户 - 显示对话框
+    showDiaAddUser () {
+        this.formdata = {}
+      this.dialogFormVisibleAdd = true
+    },
+    //   清空时获取所有用户
+    getAllUsers () {
+      this.getTableData()
+    },
+    //   搜索用户
+    searchUsers () {
+      this.pagenum = 1
+      this.getTableData()
+    },
+
     //   分页相关的方法
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
       this.pagesize = val
-      this.getTabData()
+      this.getTableData()
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
       this.pagenum = val
-      this.getTabData()
+      this.getTableData()
     },
 
-    async getTabData () {
+    async getTableData () {
       const AUTH_TOKEN = localStorage.getItem('token')
       this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
       const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
