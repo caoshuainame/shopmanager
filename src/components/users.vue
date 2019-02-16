@@ -34,8 +34,23 @@
                     {{list.row.create_time|fmtdate}}
                 </template>
             </el-table-column>
-            <el-table-column prop="name" label="用户状态" width="120"></el-table-column>
-            <el-table-column prop="name" label="操作" width="200"></el-table-column>
+            <el-table-column prop label="用户状态" width="120">
+                <template slot-scope="scope">
+                    <el-switch
+                        v-model="scope.row.mg_state"
+                        active-color="#13ce66"
+                        inactive-color="#ff4949">
+                    </el-switch>
+                </template>
+            </el-table-column>
+
+            <el-table-column prop label="操作" width="200">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
+                    <el-button type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
+                    <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
+                </template>
+            </el-table-column>
         </el-table>
         </el-card>
 
@@ -60,7 +75,7 @@ export default {
       this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
       const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
       console.log(res)
-      const {data, meta: {status, msg}} = res.data
+      const {data, meta: {status}} = res.data
       if (status === 200) {
         this.list = data.users
       }
