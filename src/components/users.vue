@@ -1,5 +1,5 @@
 <template>
-<!-- 面包屑 -->
+    <!-- 面包屑 -->
     <el-card class="box">
         <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -7,7 +7,7 @@
             <el-breadcrumb-item>用户列表</el-breadcrumb-item>
         </el-breadcrumb>
 
-<!-- 搜索框 -->
+        <!-- 搜索框 -->
         <el-row class="searchBox">
             <el-col>
                 <el-input class="searchInput" placeholder="请输入内容" v-model="query">
@@ -16,7 +16,7 @@
                 <el-button type="primary">添加用户</el-button>
             </el-col>
         </el-row>
-<!-- 表格 -->
+      <!-- 表格 -->
       <!-- id: 500
       username: "admin"
       email: "adsfad@qq.com"
@@ -52,7 +52,17 @@
                 </template>
             </el-table-column>
         </el-table>
-        </el-card>
+        <!-- 分页 -->
+        <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pagenum"
+            :page-sizes="[2, 4, 6, 8]"
+            :page-size="2"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total">
+        </el-pagination>
+    </el-card>
 
 </template>
 
@@ -62,7 +72,8 @@ export default {
     return {
       query: '',
       pagenum: 1,
-      pagesize: 10,
+      pagesize: 3,
+      total: -1,
       list: []
     }
   },
@@ -70,6 +81,18 @@ export default {
     this.getTabData()
   },
   methods: {
+    //   分页相关的方法
+    handleSizeChange (val) {
+      console.log(`每页 ${val} 条`)
+      this.pagesize = val
+      this.getTabData()
+    },
+    handleCurrentChange (val) {
+      console.log(`当前页: ${val}`)
+      this.pagenum = val
+      this.getTabData()
+    },
+
     async getTabData () {
       const AUTH_TOKEN = localStorage.getItem('token')
       this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
@@ -77,6 +100,7 @@ export default {
       console.log(res)
       const {data, meta: {status}} = res.data
       if (status === 200) {
+        this.total = data.total
         this.list = data.users
       }
     }
