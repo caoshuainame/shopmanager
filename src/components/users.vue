@@ -105,9 +105,7 @@
         <!-- 对话框-分配角色 -->
         <el-dialog title="分配角色" :visible.sync="dialogFormVisibleRole">
           <el-form :model="formdata" label-position="lift" label-width="80px">
-            <el-form-item label="用户名">
-              {{formdata.userame}}
-            </el-form-item>
+            <el-form-item label="用户名">{{formdata.userame}}</el-form-item>
             <el-form-item label="角色">
               <el-select v-model="selectVal" placeholder="请选择角色名称">
                 <el-option label="请选择" value="shanghai"></el-option>
