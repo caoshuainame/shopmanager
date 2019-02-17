@@ -37,18 +37,19 @@
             <el-table-column prop label="用户状态" width="120">
                 <template slot-scope="scope">
                     <el-switch
-                        v-model="scope.row.mg_state"
-                        active-color="#13ce66"
-                        inactive-color="#ff4949">
+                      @change="changeState(scope.row)"
+                      v-model="scope.row.mg_state"
+                      active-color="#13ce66"
+                      inactive-color="#ff4949">
                     </el-switch>
                 </template>
             </el-table-column>
 
             <el-table-column prop label="操作" width="200">
                 <template slot-scope="scope">
-                    <el-button type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
+                    <el-button @click="showDiaEditUser(scope.row)" type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
                     <el-button @click="showMsgBox(scope.row)" type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
-                    <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
+                    <el-button @click="showDiaSetRole(scope.row)" type="success" icon="el-icon-check" circle size="mini" plain></el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -83,6 +84,42 @@
             <el-button type="primary" @click="addUser()">确 定</el-button>
           </div>
         </el-dialog>
+        <!-- 对话框-编辑 -->
+        <el-dialog title="编辑用户" :visible.sync="dialogFormVisibleEdit">
+          <el-form label-position="lift" label-width="80px" :model="formdata">
+              <el-form-item label="用户名">
+                <el-input disabled v-model="formdata.username"></el-input>
+              </el-form-item>
+              <el-form-item label="邮箱">
+                <el-input v-model="formdata.email"></el-input>
+              </el-form-item>
+              <el-form-item label="电话">
+                <el-input v-model="formdata.mobile"></el-input>
+              </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleEdit = false">取 消</el-button>
+            <el-button type="primary" @click="editUser()">确 定</el-button>
+          </div>
+        </el-dialog>
+        <!-- 对话框-分配角色 -->
+        <el-dialog title="分配角色" :visible.sync="dialogFormVisibleRole">
+          <el-form :model="formdata" label-position="lift" label-width="80px">
+            <el-form-item label="用户名">
+              {{formdata.userame}}
+            </el-form-item>
+            <el-form-item label="角色">
+              <el-select v-model="selectVal" placeholder="请选择角色名称">
+                <el-option label="请选择" value="shanghai"></el-option>
+                <el-option label="区域二" value="beijing"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+            <el-button type="primary" @click="dialogFormVisibleRole = false">确 定</el-button>
+          </div>
+        </el-dialog>
     </el-card>
 
 </template>
@@ -97,18 +134,50 @@ export default {
       total: -1,
       list: [],
       dialogFormVisibleAdd: false,
+      dialogFormVisibleEdit: false,
+      dialogFormVisibleRole: false,
       formdata: {
         username: '',
         password: '',
         email: '',
         mobile: ''
-      }
+      },
+      selectVal: 1
     }
   },
   created () {
     this.getTableData()
   },
   methods: {
+    // 分配角色-显示对话框
+    async showDiaSetRole () {
+      this.dialogFormVisibleRole = true
+    },
+    // 修改用户状态
+    async changeState (user) {
+      const res = await this.$http.put(`users/${user.id}/state/${user.mg_state}`)
+      console.log(res)
+      const {meta: {status, msg}} = res.data
+      if (status === 200) {
+        this.$message.success(msg)
+      }
+    },
+    //   编辑-发送数据
+    async editUser () {
+      const res = await this.$http.put(`users/${this.formdata.id}`, this.formdata)
+      console.log(res)
+      const {meta: {status}} = res.data
+      if (status === 200) {
+        this.dialogFormVisibleEdit = false
+        this.getTableData()
+      }
+    },
+    //   编辑-显示对话框
+    showDiaEditUser (user) {
+      this.formdata = user
+
+      this.dialogFormVisibleEdit = true
+    },
     //   删除-弹出确认框
     showMsgBox (user) {
       this.$confirm('是否把我删除?', '提示', {
@@ -145,7 +214,7 @@ export default {
     },
     //   添加用户 - 显示对话框
     showDiaAddUser () {
-        this.formdata = {}
+      this.formdata = {}
       this.dialogFormVisibleAdd = true
     },
     //   清空时获取所有用户
