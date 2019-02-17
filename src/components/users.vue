@@ -104,18 +104,18 @@
         </el-dialog>
         <!-- 对话框-分配角色 -->
         <el-dialog title="分配角色" :visible.sync="dialogFormVisibleRole">
-          <el-form :model="formdata" label-position="lift" label-width="80px">
-            <el-form-item label="用户名">{{formdata.userame}}</el-form-item>
+          <el-form :model="formdata" label-position="left" label-width="80px">
+            <el-form-item label="用户名">{{formdata.username}}</el-form-item>
             <el-form-item label="角色">
               <el-select v-model="selectVal" placeholder="请选择角色名称">
-                <el-option label="请选择" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+                <el-option label="请选择" :value="-1"></el-option>
+                <el-option :label="item.roleName" :value="item.id" v-for="(item) in roles" :key="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
-            <el-button type="primary" @click="dialogFormVisibleRole = false">确 定</el-button>
+            <el-button type="primary" @click="setRole()">确 定</el-button>
           </div>
         </el-dialog>
     </el-card>
@@ -128,7 +128,7 @@ export default {
     return {
       query: '',
       pagenum: 1,
-      pagesize: 3,
+      pagesize: 2,
       total: -1,
       list: [],
       dialogFormVisibleAdd: false,
@@ -140,16 +140,43 @@ export default {
         email: '',
         mobile: ''
       },
-      selectVal: 1
+      selectVal: -1,
+      roles: [],
+      currUserId: -1
     }
   },
   created () {
     this.getTableData()
   },
   methods: {
+    // 分配角色-发送请求
+    async setRole () {
+      const res = await this.$http.put(`users/${this.currUserId}/role`, {rid: this.selectVal})
+      const {meta: {msg, status}} = res.data
+      if (status === 200) {
+        this.dialogFormVisibleRole = false
+        this.$message.success(msg)
+      }
+    },
     // 分配角色-显示对话框
-    async showDiaSetRole () {
+    async showDiaSetRole (user) {
+      this.currUserId = user.id
+      this.formdata = user
       this.dialogFormVisibleRole = true
+      const res = await this.$http.get(`roles`)
+      console.log(res)
+      const {meta: {status}, data} = res.data
+      if (status === 200) {
+        this.roles = data
+        console.log(this.roles)
+      }
+      // 获取当前用户的角色id
+      const res2 = await this.$http.get(`users/${user.id}`)
+      console.log(res2)
+      // const {meta: {status2},data2} = res2.data
+      // if (status2 === 200) {
+      this.selectVal = res2.data.data.rid
+      // }
     },
     // 修改用户状态
     async changeState (user) {
@@ -228,6 +255,7 @@ export default {
     //   分页相关的方法
     handleSizeChange (val) {
       console.log(`每页 ${val} 条`)
+      this.pagenum = 1
       this.pagesize = val
       this.getTableData()
     },
