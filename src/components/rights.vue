@@ -31,8 +31,6 @@ export default {
   },
   methods: {
     async getTableData () {
-      const AUTH_TOKEN = localStorage.getItem('token')
-      this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
       const res = await this.$http.get(`rights/list`)
       console.log(res)
       const {meta: {status}, data} = res.data

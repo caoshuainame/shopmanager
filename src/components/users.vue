@@ -198,9 +198,10 @@ export default {
       }
     },
     //   编辑-显示对话框
-    showDiaEditUser (user) {
-      this.formdata = user
-
+    async showDiaEditUser (user) {
+      // this.formdata = user
+      const res = await this.$http.get(`users/${user.id}`)
+      this.formdata = res.data.data
       this.dialogFormVisibleEdit = true
     },
     //   删除-弹出确认框
@@ -266,8 +267,6 @@ export default {
     },
 
     async getTableData () {
-      const AUTH_TOKEN = localStorage.getItem('token')
-      this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
       const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
       console.log(res)
       const {data, meta: {status}} = res.data
