@@ -63,14 +63,27 @@
               </el-upload>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品内容" name="5">商品内容</el-tab-pane>
+          <el-tab-pane label="商品内容" name="5">
+            <el-form-item>
+              <el-button @click="addGoods()">添加商品</el-button>
+              <quill-editor v-model="form.goods_introduce" class="quill"></quill-editor>
+            </el-form-item>
+          </el-tab-pane>
         </el-tabs>
       </el-form>
     </el-card>
 </template>
 
 <script>
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+import { quillEditor } from 'vue-quill-editor'
+
 export default {
+  components: {
+    quillEditor
+  },
   data () {
     return {
       active: '1',
@@ -82,8 +95,8 @@ export default {
         goods_number: '',
         goods_weight: '',
         goods_introduce: '',
-        pics: '',
-        attrs: ''
+        pics: [],
+        attrs: []
       },
       //   级联配置的数组
       options: [],
@@ -106,21 +119,73 @@ export default {
     this.getGoodsCate()
   },
   methods: {
+    async addGoods () {
+      this.form.goods_cat = this.selectedOptions.join(',')
+
+      // const res = this.$http.post(`goods`, this.form)
+      // console.log(res)
+      // 处理动态
+      const obj1 = {attr_id:"",attr_vals:""}
+      const arr1 = []
+
+      this.arrDy.forEach(item=>{
+        obj1.attr_id = item.attr_id
+        obj1.attr_vals = item.attr_vals
+        arr1.push(obj1)
+      })
+
+      // 处理静态
+      const obj2 = {attr_id:"",attr_vals:""}
+      const arr2 = []
+
+      this.arrStatic.forEach(item=>{
+        obj2.attr_id = item.attr_id
+        obj2.attr_vals = item.attr_vals
+        arr2.push(obj2)
+      })
+
+      this.form.attrs = [...arr1,...arr2]
+
+      const res = await this.$http.post(`goods`,this.form)
+
+      console.log(res)
+      const {meta:{msg,status}} = res.data
+      if (status===201){
+        this.$router.push({
+          name:"goods"
+        })
+      }else{
+        this.$message.error(msg)
+      }
+    },
     // 移除文件
     handleRemove (file, fileList) {
-      console.log('remove-----')
-      console.log(file)
+      // console.log('remove-----')
+      // console.log(file)
+      const Index = this.form.pics.map((item)=>{
+        return item.pic === file.reponse.data.tmp_path
+      })
+      this.form.pics.splice(Index,1)
     },
     // 假上传成功
     handleSuccess (res, file, fileList) {
-      console.log('success-----')
-      console.log(res)
+      // console.log('success-----')
+      // console.log(res)
+      const temPath = res.data.tmp_path
+      this.form.pics.push({
+        pic:temPath
+      })
     },
     //   点击任何tap触发
     async changeTab () {
       if (this.active === '2' || this.active === '3') {
         if (this.selectedOptions.length !== 3) {
           this.$message.error('请选择三级分类')
+          if (this.active === '2') {
+            this.arrDy = []
+          } else {
+            this.arrStatic = []
+          }
           return
         }
         if (this.active === '2') {
@@ -178,5 +243,9 @@ export default {
 .form{
     height: 400px;
     overflow: auto;
+}
+.ql-editor,
+.ql-blank{
+  min-height: 200px;
 }
 </style>
