@@ -46,8 +46,23 @@
               </el-checkbox-group>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="商品属性" name="3">商品属性</el-tab-pane>
-          <el-tab-pane label="商品图片" name="4">商品图片</el-tab-pane>
+          <el-tab-pane label="商品属性" name="3">
+            <el-form-item :label="item.attr_name" v-for="(item) in arrStatic" :key="item.attr_id">
+                <el-input v-model="item.attr_vals"></el-input>
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="商品图片" name="4">
+            <el-form-item label="添加图片">
+              <el-upload
+                :headers="headers"
+                action="http://localhost:8888/api/private/v1/upload"
+                :on-remove="handleRemove"
+                :on-success="handleSuccess"
+                list-type="picture">
+                <el-button size="small" type="primary">点击上传</el-button>
+              </el-upload>
+            </el-form-item>
+          </el-tab-pane>
           <el-tab-pane label="商品内容" name="5">商品内容</el-tab-pane>
         </el-tabs>
       </el-form>
@@ -81,13 +96,26 @@ export default {
       // checkList: [],
       //   动态参数的数组
       arrDy: [],
-      arrStatic:[]
+      arrStatic: [],
+      headers: {
+        Authorization: localStorage.getItem('token')
+      }
     }
   },
   created () {
     this.getGoodsCate()
   },
   methods: {
+    // 移除文件
+    handleRemove (file, fileList) {
+      console.log('remove-----')
+      console.log(file)
+    },
+    // 假上传成功
+    handleSuccess (res, file, fileList) {
+      console.log('success-----')
+      console.log(res)
+    },
     //   点击任何tap触发
     async changeTab () {
       if (this.active === '2' || this.active === '3') {
@@ -108,18 +136,18 @@ export default {
                 item.attr_vals = item.attr_vals.trim().split(',')
               }
             })
-            console.log(this.arrDy)
+            // console.log(this.arrDy)
           }
         }
-        if (this.active==='3'){
+        if (this.active === '3') {
           const res = await this.$http.get(`categories/${this.selectedOptions[2]}/attributes?sel=only`)
           //   console.log(res)
           const {meta: {status}, data} = res.data
           if (status === 200) {
             this.arrStatic = data
-            
-            console.log(this.arrStatic)
-          }          
+
+            // console.log(this.arrStatic)
+          }
         }
       }
     },
