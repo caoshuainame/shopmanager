@@ -50,11 +50,11 @@ export default {
     }
   },
   beforeMount () {
-    if (!localStorage.getItem('token')) {
-      this.$router.push({
-        name: 'login'
-      })
-    }
+    // if (!localStorage.getItem('token')) {
+    //   this.$router.push({
+    //     name: 'login'
+    //   })
+    // }
   },
   created () {
     this.getMenus()
