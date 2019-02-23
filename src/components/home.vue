@@ -19,7 +19,7 @@
       <el-container>
       <!-- 侧边栏 -->
         <el-aside class="aside" width="200px">
-            <el-menu default-active="1" :router="true" :unique-opened="true">
+            <el-menu @select="fn" :default-active="$route.name" :router="true" :unique-opened="true">
                 <!-- 用户管理 -->
                 <el-submenu :index="item1.order+''" v-for="(item1) in menus" :key="item1.id">
                   <template slot="title">
@@ -60,12 +60,15 @@ export default {
     this.getMenus()
   },
   methods: {
+    fn (index, indexPath) {
+
+    },
     async getMenus () {
       const res = await this.$http.get(`menus`)
       const {meta: {status}, data} = res.data
       if (status === 200) {
         this.menus = data
-        console.log(this.menus)
+        // console.log(this.menus)
       }
     },
     // 退出

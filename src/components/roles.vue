@@ -1,10 +1,12 @@
 <template>
     <el-card class="box">
+
         <!-- 面包屑 -->
         <cusBread level1="权限管理" level2="角色列表"></cusBread>
         <el-button class="btn" type="primary">添加角色</el-button>
+
         <!-- 表格 -->
-        <el-table :data="roles" style="width: 100%">
+        <el-table @expand-change="fn" :data="roles" style="width: 100%">
 
             <el-table-column type="expand">
               <template slot-scope="scope">
@@ -43,6 +45,7 @@
                 </template>
             </el-table-column>
         </el-table>
+
         <!-- 对话框-分配权限 -->
         <el-dialog title="分配权限" :visible.sync="dialogFormVisible">
           <el-tree
@@ -59,6 +62,7 @@
             <el-button type="primary" @click="setRights()">确 定</el-button>
           </div>
         </el-dialog>
+
     </el-card>
 </template>
 
@@ -86,6 +90,11 @@ export default {
     this.getRoles()
   },
   methods: {
+    fn (row, expandedRows) {
+      if (expandedRows.length > 1) {
+        expandedRows.shift()
+      }
+    },
     // 分配权限
     async setRights () {
       console.log(this.currRoleId)

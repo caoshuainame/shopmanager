@@ -112,7 +112,8 @@ export default {
       arrStatic: [],
       headers: {
         Authorization: localStorage.getItem('token')
-      }
+      },
+      flag: true
     }
   },
   created () {
@@ -125,36 +126,36 @@ export default {
       // const res = this.$http.post(`goods`, this.form)
       // console.log(res)
       // 处理动态
-      const obj1 = {attr_id:"",attr_vals:""}
+      const obj1 = {attr_id: '', attr_vals: ''}
       const arr1 = []
 
-      this.arrDy.forEach(item=>{
+      this.arrDy.forEach(item => {
         obj1.attr_id = item.attr_id
         obj1.attr_vals = item.attr_vals
         arr1.push(obj1)
       })
 
       // 处理静态
-      const obj2 = {attr_id:"",attr_vals:""}
+      const obj2 = {attr_id: '', attr_vals: ''}
       const arr2 = []
 
-      this.arrStatic.forEach(item=>{
+      this.arrStatic.forEach(item => {
         obj2.attr_id = item.attr_id
         obj2.attr_vals = item.attr_vals
         arr2.push(obj2)
       })
 
-      this.form.attrs = [...arr1,...arr2]
+      this.form.attrs = [...arr1, ...arr2]
 
-      const res = await this.$http.post(`goods`,this.form)
+      const res = await this.$http.post(`goods`, this.form)
 
       console.log(res)
-      const {meta:{msg,status}} = res.data
-      if (status===201){
+      const {meta: {msg, status}} = res.data
+      if (status === 201) {
         this.$router.push({
-          name:"goods"
+          name: 'goods'
         })
-      }else{
+      } else {
         this.$message.error(msg)
       }
     },
@@ -162,10 +163,10 @@ export default {
     handleRemove (file, fileList) {
       // console.log('remove-----')
       // console.log(file)
-      const Index = this.form.pics.map((item)=>{
+      const Index = this.form.pics.map((item) => {
         return item.pic === file.reponse.data.tmp_path
       })
-      this.form.pics.splice(Index,1)
+      this.form.pics.splice(Index, 1)
     },
     // 假上传成功
     handleSuccess (res, file, fileList) {
@@ -173,7 +174,7 @@ export default {
       // console.log(res)
       const temPath = res.data.tmp_path
       this.form.pics.push({
-        pic:temPath
+        pic: temPath
       })
     },
     //   点击任何tap触发
@@ -188,7 +189,7 @@ export default {
           }
           return
         }
-        if (this.active === '2') {
+        if (this.active === '2' && this.flag === true) {
           const res = await this.$http.get(`categories/${this.selectedOptions[2]}/attributes?sel=many`)
           //   console.log(res)
           const {meta: {status}, data} = res.data
@@ -200,6 +201,7 @@ export default {
               } else {
                 item.attr_vals = item.attr_vals.trim().split(',')
               }
+              this.flag = false
             })
             // console.log(this.arrDy)
           }

@@ -24,7 +24,8 @@
       create_time: 1486720211
       mg_state: true
       role_name: "主管" -->
-        <el-table :data="list" style="width: 100%">
+
+        <el-table v-loading="loading" :data="list" style="width: 100%">
             <el-table-column prop="id" label="#" width="80"></el-table-column>
             <el-table-column prop="username" label="姓名" width="100"></el-table-column>
             <el-table-column prop="email" label="邮箱" width="140"></el-table-column>
@@ -142,7 +143,8 @@ export default {
       },
       selectVal: -1,
       roles: [],
-      currUserId: -1
+      currUserId: -1,
+      loading: true
     }
   },
   created () {
@@ -219,6 +221,7 @@ export default {
           const {meta: {msg, status}} = res.data
           if (status === 200) {
             // 提示成功
+
             this.$message.success(msg)
             this.pagenum = 1
             this.getTableData()
@@ -273,6 +276,7 @@ export default {
       if (status === 200) {
         this.total = data.total
         this.list = data.users
+        this.loading = false
       }
     }
   }
